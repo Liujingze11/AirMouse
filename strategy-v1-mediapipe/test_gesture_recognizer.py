@@ -3,7 +3,7 @@
 import sys
 sys.path.insert(0, '.')
 
-from gesture_recognizer import Gesture, classify_gesture
+from gesture_recognizer import Gesture, classify_gesture, get_fingertip_position
 
 # 模拟 MediaPipe landmark 对象
 class FakeLM:
@@ -113,6 +113,19 @@ def test_flat_hand():
         f"Flat hand should not be pinch or fist, got {result}"
 
 
+def test_get_fingertip_position():
+    from gesture_recognizer import get_fingertip_position
+    lms = make_pointing_hand()
+    pos = get_fingertip_position(lms)
+    assert pos is not None
+    assert abs(pos[0] - 0.5) < 0.01  # index tip x from pointing hand
+    assert abs(pos[1] - 0.1) < 0.01  # index tip y from pointing hand
+    # None case
+    assert get_fingertip_position(None) is None
+    assert get_fingertip_position([]) is None
+    print("✓ test_get_fingertip_position passed")
+
+
 if __name__ == '__main__':
     test_pointing()
     print("✓ test_pointing passed")
@@ -124,4 +137,5 @@ if __name__ == '__main__':
     print("✓ test_fist passed")
     test_flat_hand()
     print("✓ test_flat_hand passed")
+    test_get_fingertip_position()
     print("\n所有测试通过!")

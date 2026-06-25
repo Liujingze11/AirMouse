@@ -11,6 +11,19 @@ from config import (
 )
 
 
+# 关键点索引
+WRIST = 0
+THUMB_TIP = 4
+INDEX_TIP = 8
+INDEX_MCP = 5
+MIDDLE_TIP = 12
+MIDDLE_MCP = 9
+RING_TIP = 16
+RING_MCP = 13
+PINKY_TIP = 20
+PINKY_MCP = 17
+
+
 class Gesture(Enum):
     NONE = auto()
     POINTING = auto()           # 食指指向（控制光标移动）
@@ -31,18 +44,6 @@ def classify_gesture(landmarks: list) -> Gesture:
     """
     if landmarks is None or len(landmarks) < 21:
         return Gesture.NONE
-
-    # 关键点索引
-    WRIST = 0
-    THUMB_TIP = 4
-    INDEX_TIP = 8
-    INDEX_MCP = 5       # 食指根部
-    MIDDLE_TIP = 12
-    MIDDLE_MCP = 9
-    RING_TIP = 16
-    RING_MCP = 13
-    PINKY_TIP = 20
-    PINKY_MCP = 17
 
     lm = landmarks
     wrist = lm[WRIST]
@@ -88,8 +89,7 @@ def classify_gesture(landmarks: list) -> Gesture:
 
 
 def get_fingertip_position(landmarks: list) -> tuple[float, float] | None:
-    """返回食指尖的像素坐标 (x, y)，用于光标控制"""
+    """返回食指尖的归一化坐标 (x, y)，值域 0-1，用于光标控制"""
     if landmarks is None or len(landmarks) < 21:
         return None
-    INDEX_TIP = 8
     return (landmarks[INDEX_TIP].x, landmarks[INDEX_TIP].y)
