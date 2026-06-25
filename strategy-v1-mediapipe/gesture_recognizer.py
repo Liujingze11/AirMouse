@@ -1,6 +1,7 @@
 """GestureRecognizer — 从 MediaPipe 手部关键点识别手势"""
 
 from enum import Enum, auto
+from enum import Enum as _Enum, auto as _auto
 import math
 from config import (
     POINTING_FINGERTIP_ABOVE_KNUCKLE,
@@ -8,6 +9,8 @@ from config import (
     PINCH_THUMB_INDEX_MAX_DIST,
     PINCH_THUMB_MIDDLE_MAX_DIST,
     FIST_MAX_DIST_TO_WRIST,
+    FIST_HOLD_FRAMES,
+    PINCH_HOLD_FRAMES,
 )
 
 
@@ -93,3 +96,78 @@ def get_fingertip_position(landmarks: list) -> tuple[float, float] | None:
     if landmarks is None or len(landmarks) < 21:
         return None
     return (landmarks[INDEX_TIP].x, landmarks[INDEX_TIP].y)
+
+
+# ─── App State & State Machine ────────────────────────────────────────────────
+
+
+class AppState(_Enum):
+    PAUSED = _auto()     # 暂停，不控制光标
+    ACTIVE = _auto()     # 运行中，食指指向=移动光标
+    LEFT_DOWN = _auto()  # 左键按下
+    DRAGGING = _auto()   # 拖拽中
+
+
+class GestureStateMachine:
+    """手势状态机：管理 App 状态转换，处理防抖"""
+
+    def __init__(self):
+        self.state = AppState.PAUSED          # 启动时默认暂停，握拳激活
+        self._fist_counter = 0
+        self._pinch_counter = 0
+        self._right_click_fired = False       # 右键只触发一次，需松开后重置
+
+    def update(self, gesture: Gesture) -> AppState:
+        """输入当前帧手势，返回新的 AppState"""
+
+        # --- 握拳切换 暂停/运行 ---
+        if gesture == Gesture.FIST:
+            self._fist_counter += 1
+            if self._fist_counter >= FIST_HOLD_FRAMES:
+                self._fist_counter = 0
+                if self.state == AppState.PAUSED:
+                    self.state = AppState.ACTIVE
+                elif self.state == AppState.ACTIVE:
+                    self.state = AppState.PAUSED
+                    # 暂停时释放所有按键
+                    self._reset_pinch()
+        else:
+            self._fist_counter = 0
+
+        # 暂停状态不处理其他手势
+        if self.state == AppState.PAUSED:
+            return self.state
+
+        # --- 右键点击（瞬时触发）---
+        if gesture == Gesture.PINCH_THUMB_MIDDLE:
+            if not self._right_click_fired:
+                self._right_click_fired = True
+                # 右键触发后回到 ACTIVE（右键是瞬时操作）
+                self._reset_pinch()
+                # 注意：实际 mouse 调用在 CursorController 中
+                # 这里通过状态转换来通知
+        else:
+            self._right_click_fired = False
+
+        # --- 左键捏合 ---
+        if gesture == Gesture.PINCH_THUMB_INDEX:
+            self._pinch_counter += 1
+            if self._pinch_counter >= PINCH_HOLD_FRAMES:
+                if self.state == AppState.ACTIVE:
+                    self.state = AppState.LEFT_DOWN
+                elif self.state == AppState.LEFT_DOWN:
+                    self.state = AppState.DRAGGING
+        else:
+            # 捏合松开了
+            if self.state in (AppState.LEFT_DOWN, AppState.DRAGGING):
+                self.state = AppState.ACTIVE
+            self._pinch_counter = 0
+
+        return self.state
+
+    def _reset_pinch(self):
+        self._pinch_counter = 0
+
+    @property
+    def is_active(self) -> bool:
+        return self.state != AppState.PAUSED
