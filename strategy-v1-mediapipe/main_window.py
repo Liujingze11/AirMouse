@@ -213,6 +213,8 @@ class MainWindow(QMainWindow):
         btn_min.clicked.connect(self.hide)
         hbox.addWidget(btn_min)
 
+        layout.addWidget(bar)
+
     def _build_tray(self):
         self.tray = QSystemTrayIcon(self)
         # 使用简单的彩色方块作为图标（因为没有图标文件）
