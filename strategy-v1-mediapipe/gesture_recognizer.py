@@ -1,7 +1,6 @@
 """GestureRecognizer — 从 MediaPipe 手部关键点识别手势"""
 
 from enum import Enum, auto
-from enum import Enum as _Enum, auto as _auto
 import math
 from config import (
     POINTING_FINGERTIP_ABOVE_KNUCKLE,
@@ -101,11 +100,11 @@ def get_fingertip_position(landmarks: list) -> tuple[float, float] | None:
 # ─── App State & State Machine ────────────────────────────────────────────────
 
 
-class AppState(_Enum):
-    PAUSED = _auto()     # 暂停，不控制光标
-    ACTIVE = _auto()     # 运行中，食指指向=移动光标
-    LEFT_DOWN = _auto()  # 左键按下
-    DRAGGING = _auto()   # 拖拽中
+class AppState(Enum):
+    PAUSED = auto()     # 暂停，不控制光标
+    ACTIVE = auto()     # 运行中，食指指向=移动光标
+    LEFT_DOWN = auto()  # 左键按下
+    DRAGGING = auto()   # 拖拽中
 
 
 class GestureStateMachine:
@@ -122,6 +121,12 @@ class GestureStateMachine:
 
         # --- 握拳切换 暂停/运行 ---
         if gesture == Gesture.FIST:
+            # 握拳时如果正在左键按下/拖拽，先释放
+            if self.state in (AppState.LEFT_DOWN, AppState.DRAGGING):
+                self._reset_pinch()
+                self.state = AppState.ACTIVE
+                self._fist_counter = 0
+                return self.state
             self._fist_counter += 1
             if self._fist_counter >= FIST_HOLD_FRAMES:
                 self._fist_counter = 0

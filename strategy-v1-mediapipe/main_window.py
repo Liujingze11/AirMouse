@@ -69,8 +69,10 @@ class CameraWidget(QLabel):
         # 绘制骨骼和标注
         if landmarks:
             painter = QPainter(scaled)
-            self._draw_landmarks(painter, scaled.width(), scaled.height())
-            painter.end()
+            try:
+                self._draw_landmarks(painter, scaled.width(), scaled.height())
+            finally:
+                painter.end()
 
         self.setPixmap(scaled)
 
