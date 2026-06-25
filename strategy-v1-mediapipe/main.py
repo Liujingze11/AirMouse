@@ -4,7 +4,6 @@
 import sys
 import signal
 from PyQt6.QtWidgets import QApplication, QMessageBox
-from PyQt6.QtCore import Qt
 
 from main_window import MainWindow
 
@@ -24,7 +23,7 @@ def main():
         if not cap.isOpened():
             QMessageBox.critical(
                 None, "摄像头错误",
-                "无法打开摄像头 (/dev/video0)。\n请检查摄像头是否被占用或已连接。",
+                "无法打开默认摄像头。\n请检查摄像头是否被占用或已连接。",
             )
             sys.exit(1)
         cap.release()
