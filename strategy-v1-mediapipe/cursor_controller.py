@@ -37,6 +37,8 @@ class CursorController:
         self._smoothed_y = None
         self._prev_norm_x = None
         self._prev_norm_y = None
+        self._right_click_pending = False
+        self._left_down = False
 
     def update(
         self,

@@ -115,7 +115,7 @@ class GestureStateMachine:
         self.state = AppState.PAUSED          # 启动时默认暂停，握拳激活
         self._fist_counter = 0
         self._pinch_counter = 0
-        self._right_click_fired = False       # 右键只触发一次，需松开后重置
+        # 右键只触发一次，需松开后重置（在 CursorController 中处理）
 
     def update(self, gesture: Gesture) -> AppState:
         """输入当前帧手势，返回新的 AppState"""
@@ -138,16 +138,10 @@ class GestureStateMachine:
         if self.state == AppState.PAUSED:
             return self.state
 
-        # --- 右键点击（瞬时触发）---
+        # --- 右键点击（瞬时触发，实际鼠标调用在 CursorController 中）---
         if gesture == Gesture.PINCH_THUMB_MIDDLE:
-            if not self._right_click_fired:
-                self._right_click_fired = True
-                # 右键触发后回到 ACTIVE（右键是瞬时操作）
-                self._reset_pinch()
-                # 注意：实际 mouse 调用在 CursorController 中
-                # 这里通过状态转换来通知
-        else:
-            self._right_click_fired = False
+            self._reset_pinch()
+            # 右键通过 CursorController 直接处理（基于原始手势判断）
 
         # --- 左键捏合 ---
         if gesture == Gesture.PINCH_THUMB_INDEX:
