@@ -1,11 +1,10 @@
 """MainWindow — PyQt6 GUI：摄像头预览 + 手部骨骼 + 状态栏 + 系统托盘"""
 
-import cv2
+
 import numpy as np
 from PyQt6.QtWidgets import (
     QMainWindow, QWidget, QVBoxLayout, QHBoxLayout, QLabel,
-    QPushButton, QSlider, QSystemTrayIcon, QMenu, QApplication,
-    QStatusBar, QFrame,
+    QPushButton, QSlider, QSystemTrayIcon, QMenu, QFrame,
 )
 from PyQt6.QtCore import Qt, QTimer, pyqtSignal
 from PyQt6.QtGui import QImage, QPixmap, QIcon, QAction, QPainter, QPen, QColor, QFont
@@ -212,11 +211,6 @@ class MainWindow(QMainWindow):
         btn_min.clicked.connect(self.hide)
         hbox.addWidget(btn_min)
 
-        layout = self.centralWidget().layout()
-        # 在 QVBoxLayout 中找到 camera_widget 的位置，添加 bar
-        if isinstance(layout, QVBoxLayout):
-            layout.addWidget(bar)
-
     def _build_tray(self):
         self.tray = QSystemTrayIcon(self)
         # 使用简单的彩色方块作为图标（因为没有图标文件）
@@ -256,17 +250,12 @@ class MainWindow(QMainWindow):
                 self.show_and_raise()
 
     def _toggle_pause(self):
+        self.gesture_sm.toggle_pause()
+        self._sync_pause_ui()
+
+    def _sync_pause_ui(self):
+        """根据当前状态更新暂停按钮和托盘菜单的文字和样式"""
         if self.gesture_sm.state == AppState.PAUSED:
-            self.gesture_sm.state = AppState.ACTIVE
-            self.btn_toggle.setText("暂停")
-            self.btn_toggle.setStyleSheet(
-                "QPushButton { background: #c44; color: white; border: none; "
-                "padding: 5px 12px; border-radius: 4px; font-size: 13px; }"
-                "QPushButton:hover { background: #d55; }"
-            )
-            self.action_toggle_tray.setText("暂停")
-        else:
-            self.gesture_sm.state = AppState.PAUSED
             self.btn_toggle.setText("启动")
             self.btn_toggle.setStyleSheet(
                 "QPushButton { background: #4a4; color: white; border: none; "
@@ -274,6 +263,14 @@ class MainWindow(QMainWindow):
                 "QPushButton:hover { background: #5b5; }"
             )
             self.action_toggle_tray.setText("启动")
+        else:
+            self.btn_toggle.setText("暂停")
+            self.btn_toggle.setStyleSheet(
+                "QPushButton { background: #c44; color: white; border: none; "
+                "padding: 5px 12px; border-radius: 4px; font-size: 13px; }"
+                "QPushButton:hover { background: #d55; }"
+            )
+            self.action_toggle_tray.setText("暂停")
 
     def _on_sensitivity_changed(self, val):
         sens = val / 10.0
@@ -312,22 +309,7 @@ class MainWindow(QMainWindow):
         self.camera_widget.set_frame(frame, landmarks, gesture_text)
 
         # 同步按钮状态（当手势握拳切换时）
-        if app_state == AppState.PAUSED:
-            self.btn_toggle.setText("启动")
-            self.btn_toggle.setStyleSheet(
-                "QPushButton { background: #4a4; color: white; border: none; "
-                "padding: 5px 12px; border-radius: 4px; font-size: 13px; }"
-                "QPushButton:hover { background: #5b5; }"
-            )
-            self.action_toggle_tray.setText("启动")
-        else:
-            self.btn_toggle.setText("暂停")
-            self.btn_toggle.setStyleSheet(
-                "QPushButton { background: #c44; color: white; border: none; "
-                "padding: 5px 12px; border-radius: 4px; font-size: 13px; }"
-                "QPushButton:hover { background: #d55; }"
-            )
-            self.action_toggle_tray.setText("暂停")
+        self._sync_pause_ui()
 
     def _update_status(self, app_state, has_hand, gesture, event):
         # 运行状态

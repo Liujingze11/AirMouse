@@ -159,6 +159,16 @@ class GestureStateMachine:
 
         return self.state
 
+    def toggle_pause(self) -> AppState:
+        """手动切换暂停/运行状态，正确重置内部计数器"""
+        self._reset_pinch()
+        self._fist_counter = 0
+        if self.state == AppState.PAUSED:
+            self.state = AppState.ACTIVE
+        else:
+            self.state = AppState.PAUSED
+        return self.state
+
     def _reset_pinch(self):
         self._pinch_counter = 0
 
