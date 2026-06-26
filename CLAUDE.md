@@ -20,7 +20,6 @@
 
 | 项 | 说明 |
 |----|------|
-| README 结构图 | 仍显示旧扁平结构，需更新为 `airmouse/` 包 |
 | Wayland | pyautogui 在 Wayland 上功能受限，仅 X11 完整支持 |
 | 单手 | 只跟踪 confidence 最高的手 |
 | 多显示器 | 只映射主显示器 |
