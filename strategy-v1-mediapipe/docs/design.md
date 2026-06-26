@@ -2,6 +2,7 @@
 
 > 日期：2026-06-25
 > 方案：MediaPipe 手部关键点 + PyQt6 GUI + pyautogui 鼠标控制（混合映射 + EMA+死区平滑）
+> ⚠️ **本文档仅描述 strategy-v1-mediapipe 方案。** AirMouse 项目支持多个独立策略目录，后续方案可能有完全不同的手势定义、追踪算法和交互模式。
 
 ---
 

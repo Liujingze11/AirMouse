@@ -1,135 +1,58 @@
 # AirMouse — 项目上下文
 
-> 地图（去哪找）+ 日志（改过什么）。设计原理见 `docs/`，用户文档见 `README.md`。
+> 多方案实验项目框架。各策略目录是独立子项目，各自带有 `CLAUDE.md` + `README.md` + 代码。
 > 最后更新：2026-06-26
 
 ---
 
 ## 一、项目一句话
 
-**摄像头 + MediaPipe 识别单手手势 → 控制 Linux 桌面光标。** 食指移动、捏合点击/拖拽、握拳暂停。
+**用摄像头手势识别控制 Linux 桌面光标的多方案实验项目。** 不同方案（追踪算法、交互姿势、映射策略）各自独立目录，互不干扰，方便对比。
 
 ---
 
-## 二、当前状态
-
-- **v1 完成**（2026-06-26），测试全部通过，代码已重构为 `airmouse/` 包。
-- **无阻塞问题**。
-
-### 已知坑
-
-| 项 | 说明 |
-|----|------|
-| Wayland | pyautogui 在 Wayland 上功能受限，仅 X11 完整支持 |
-| 单手 | 只跟踪 confidence 最高的手 |
-| 多显示器 | 只映射主显示器 |
-
-### 下一步（v2 可选）
-
-双手支持、自定义手势配置化、多屏适配、开机自启。
-
----
-
-## 三、项目结构
+## 二、策略目录约定
 
 ```
 AirMouse/
-├── CLAUDE.md                    # 本文件
-├── README.md                    # 用户文档
+├── CLAUDE.md                 # 本文件（框架层面）
+├── README.md                 # 项目概述（给人看）
 ├── .gitignore
-├── docs/
-│   └── superpowers/specs/
-│       └── 2026-06-25-airmouse-v1-design.md   # 设计文档（架构、手势规则、UI 设计）
-└── strategy-v1-mediapipe/       # v1 实现
-    ├── main.py                  # 入口
-    ├── requirements.txt
-    ├── airmouse/                # 核心包
-    │   ├── config.py            # 所有阈值、灵敏度、EMA 参数
-    │   ├── hand_tracker.py      # cv2 摄像头 + MediaPipe Hands → 21 关键点
-    │   ├── gesture_recognizer.py # Gesture 分类 + AppState 状态机
-    │   ├── cursor_controller.py # EMA+死区平滑 + 混合映射 + pyautogui
-    │   └── main_window.py      # PyQt6 GUI：预览 + 骨骼 + 状态栏 + 托盘
-    └── tests/
-        ├── test_gesture_recognizer.py  # 6 个手势分类测试
-        └── test_state_machine.py       # 8 个状态机测试
+└── strategy-v1-mediapipe/    # 独立子项目
+    ├── CLAUDE.md             # 该方案的 AI 上下文
+    ├── README.md             # 该方案的用户文档
+    ├── docs/                 # 该方案的设计文档
+    ├── main.py
+    └── ...
 ```
+
+- 每个策略目录是自含的独立项目：自带 `CLAUDE.md`、`README.md`、代码、测试、文档。
+- 命名规范：`strategy-v{序号}-{简短描述}`
+- 目录之间互不依赖、互不干扰。
 
 ---
 
-## 四、架构速览
+## 三、当前策略
 
-```
-Camera → HandTracker → GestureRecognizer(+状态机) → CursorController → pyautogui
-                              ↕
-                        MainWindow (GUI)
-```
-
-- **HandTracker** — 摄像头取帧 + MediaPipe 推理，返回 21 个归一化关键点
-- **GestureRecognizer** — 纯函数 `classify_gesture(landmarks) → Gesture` + `GestureStateMachine` 管理 AppState（PAUSED/ACTIVE/LEFT_DOWN/DRAGGING）
-- **CursorController** — EMA 平滑 + 死区 + 混合映射 + pyautogui 调用
-- **MainWindow** — QTimer 30fps 驱动全流程，摄像头预览 + 骨骼叠加 + 系统托盘
-
-> 手势规则、状态机图、UI 布局详见 `docs/superpowers/specs/2026-06-25-airmouse-v1-design.md`
-> 所有配置常量详见 `airmouse/config.py`
+| 目录 | 方案 | 状态 |
+|------|------|------|
+| [strategy-v1-mediapipe/](./strategy-v1-mediapipe/) | MediaPipe Hands 21 关键点 → 单手手势控制光标 | ✅ v1 完成 |
 
 ---
 
-## 五、常用命令
+## 四、开发约定
 
-```bash
-cd strategy-v1-mediapipe
-
-# 运行
-python3 main.py
-
-# 测试
-python3 -m pytest tests/ -v
-
-# 导入验证
-python3 -c "
-from airmouse.config import *
-from airmouse.hand_tracker import HandTracker
-from airmouse.gesture_recognizer import Gesture, AppState, classify_gesture, GestureStateMachine
-from airmouse.cursor_controller import CursorController
-from airmouse.main_window import MainWindow
-print('OK')
-"
-```
-
----
-
-## 六、开发约定
-
-- **策略目录**：不同方案放 `strategy-v1-xxx/`, `strategy-v2-xxx/`
-- **配置集中**：阈值在 `config.py`，禁止魔术数字
-- **TDD**：先测试 → 验证失败 → 实现 → Commit
 - **Commit 风格**：`feat:` / `fix:` / `chore:` / `docs:`
-- **pyautogui 安全**：`FAILSAFE=False`，关闭时确保 `mouseUp()`
+- **TDD**：先测试 → 验证失败 → 实现 → Commit
+- **配置集中**：各方案的阈值/参数集中在该方案的 `config.py`，禁止魔术数字
 
 ---
 
-## 七、会话日志
+## 五、会话日志
 
-> 每次会话结束后追加一行。新会话通过读这里了解上次做到哪了。
+> 每次会话结束后追加一行。
 
 ### 2026-06-26
-- 创建 CLAUDE.md，明确四文档分工（CLAUDE.md/README/设计文档 各司其职）
-- 删除 `docs/plans/`（已执行的实现计划）和 `.superpowers/sdd/`（流水账）
-- v1 状态：全部完成，测试通过，无阻塞
-
-### 2026-06-25
-- v1 8 个 task 全部完成并 commit
-- 代码从扁平文件重构为 `airmouse/` 包 + `tests/` 目录
-- 创建 README.md
-
----
-
-## 八、参考文档
-
-| 文件 | 用途 |
-|------|------|
-| `docs/superpowers/specs/2026-06-25-airmouse-v1-design.md` | 设计原理：架构决策、手势规则、阈值来源、UI 布局、异常处理 |
-| `README.md` | 用户面向：功能介绍、安装步骤、使用方法 |
-| `airmouse/config.py` | 所有配置常量的**唯一真相源**（阈值、灵敏度、EMA 等） |
-
-**找设计决策 → 设计文档。找怎么用 → README。找参数值 → config.py。**
+- 重组项目结构：各策略目录为独立子项目，自带 CLAUDE.md + README.md
+- v1 设计文档和 README 移入 strategy-v1-mediapipe/，顶层仅保留框架概述
+- 删除顶层 docs/ 目录（内容已归入策略目录）
