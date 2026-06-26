@@ -1,9 +1,9 @@
 """GestureRecognizer 单元测试"""
 
 import sys
-sys.path.insert(0, '.')
+sys.path.insert(0, '..')
 
-from gesture_recognizer import Gesture, classify_gesture, get_fingertip_position
+from airmouse.gesture_recognizer import Gesture, classify_gesture, get_fingertip_position
 
 # 模拟 MediaPipe landmark 对象
 class FakeLM:
@@ -114,7 +114,7 @@ def test_flat_hand():
 
 
 def test_get_fingertip_position():
-    from gesture_recognizer import get_fingertip_position
+    from airmouse.gesture_recognizer import get_fingertip_position
     lms = make_pointing_hand()
     pos = get_fingertip_position(lms)
     assert pos is not None

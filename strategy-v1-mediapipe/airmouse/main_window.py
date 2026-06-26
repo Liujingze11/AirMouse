@@ -9,13 +9,13 @@ from PyQt6.QtWidgets import (
 from PyQt6.QtCore import Qt, QTimer, pyqtSignal
 from PyQt6.QtGui import QImage, QPixmap, QIcon, QAction, QPainter, QPen, QColor, QFont
 
-from hand_tracker import HandTracker
-from gesture_recognizer import (
+from .hand_tracker import HandTracker
+from .gesture_recognizer import (
     Gesture, AppState, classify_gesture, get_fingertip_position,
     GestureStateMachine,
 )
-from cursor_controller import CursorController
-from config import (
+from .cursor_controller import CursorController
+from .config import (
     WINDOW_DEFAULT_WIDTH, WINDOW_DEFAULT_HEIGHT,
     DEFAULT_SENSITIVITY,
 )

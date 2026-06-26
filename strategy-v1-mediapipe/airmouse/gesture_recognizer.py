@@ -2,7 +2,7 @@
 
 from enum import Enum, auto
 import math
-from config import (
+from .config import (
     POINTING_FINGERTIP_ABOVE_KNUCKLE,
     FINGER_CURLED_MAX_DIST,
     PINCH_THUMB_INDEX_MAX_DIST,

@@ -1,9 +1,9 @@
 """GestureStateMachine 单元测试"""
 
 import sys
-sys.path.insert(0, '.')
+sys.path.insert(0, '..')
 
-from gesture_recognizer import (
+from airmouse.gesture_recognizer import (
     Gesture, AppState, GestureStateMachine,
     FIST_HOLD_FRAMES, PINCH_HOLD_FRAMES,
 )

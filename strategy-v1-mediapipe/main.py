@@ -5,7 +5,7 @@ import sys
 import signal
 from PyQt6.QtWidgets import QApplication, QMessageBox
 
-from main_window import MainWindow
+from airmouse.main_window import MainWindow
 
 
 def main():

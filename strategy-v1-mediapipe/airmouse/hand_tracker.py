@@ -3,7 +3,7 @@
 import cv2
 import mediapipe as mp
 import numpy as np
-from config import (
+from .config import (
     CAMERA_ID, CAMERA_WIDTH, CAMERA_HEIGHT,
     MEDIAPIPE_MAX_HANDS, MEDIAPIPE_DETECTION_CONFIDENCE, MEDIAPIPE_TRACKING_CONFIDENCE,
 )

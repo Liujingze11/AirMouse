@@ -3,11 +3,11 @@
 import math
 import time
 import pyautogui
-from config import (
+from .config import (
     DEFAULT_SENSITIVITY, SENSITIVITY_MIN, SENSITIVITY_MAX,
     EMA_ALPHA, DEADZONE_PX, SPEED_THRESHOLD, SPEED_BOOST,
 )
-from gesture_recognizer import Gesture, AppState
+from .gesture_recognizer import Gesture, AppState
 
 # pyautogui 安全设置：鼠标移到屏幕角落不会触发异常（因为我们可能快速移动）
 pyautogui.FAILSAFE = False
