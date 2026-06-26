@@ -54,15 +54,17 @@ python3 main.py
 
 ```
 strategy-v1-mediapipe/
-├── main.py              # 入口
-├── config.py            # 配置常量（阈值、灵敏度等）
-├── hand_tracker.py      # MediaPipe 手部关键点识别
-├── gesture_recognizer.py # 手势分类 + 状态机
-├── cursor_controller.py  # 光标平滑控制 (EMA + 死区)
-├── main_window.py       # PyQt6 GUI + 系统托盘
-├── requirements.txt     # 依赖清单
-├── test_gesture_recognizer.py  # 手势测试
-└── test_state_machine.py       # 状态机测试
+├── main.py                  # 入口
+├── requirements.txt         # 依赖清单
+├── airmouse/                # 核心包
+│   ├── config.py            # 配置常量（阈值、灵敏度等）
+│   ├── hand_tracker.py      # MediaPipe 手部关键点识别
+│   ├── gesture_recognizer.py # 手势分类 + 状态机
+│   ├── cursor_controller.py  # 光标平滑控制 (EMA + 死区)
+│   └── main_window.py       # PyQt6 GUI + 系统托盘
+└── tests/                   # 单元测试
+    ├── test_gesture_recognizer.py
+    └── test_state_machine.py
 ```
 
 ```
@@ -74,8 +76,7 @@ Camera → HandTracker → GestureRecognizer → CursorController → pyautogui
 ## 运行测试
 
 ```bash
-python3 test_gesture_recognizer.py
-python3 test_state_machine.py
+python3 -m pytest tests/ -v
 ```
 
 ## 策略目录
